@@ -1,8 +1,16 @@
 import { sql } from "@/lib/db";
+import { isRateLimited } from "@/lib/ratelimit";
 
 const MAX_LENGTH = 10000;
 
 export async function POST(request) {
+
+  if (await isRateLimited(request)) {
+  return Response.json(
+    { error: "Too many messages. Try again in a few minutes." },
+    { status: 429 });
+  }
+
   let data;
   try {
     data = await request.json();
