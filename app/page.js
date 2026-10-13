@@ -62,8 +62,8 @@ export default function Home() {
             <header className="hero">
               <h1>Tales from Under the Hood</h1>
               <p className="sub">
-                Got a spooky school story? Tell us about them! That night before an exam,
-                or that terror teacher from high school, your stories are safe with us 👻📚
+                Got a spooky school story? Tell us about them, friend! That night before an exam,
+                or that terror teacher from high school—your stories are shared with us anonymously 👻📚
               </p>
             </header>
 
@@ -108,7 +108,7 @@ export default function Home() {
               </button>
 
               <p className="fine">
-                Nobody will know it came from you :&gt;
+                A Bit of Bonfire | BU ACCeSS 2627
               </p>
             </form>
           </>
