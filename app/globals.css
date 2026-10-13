@@ -1,67 +1,292 @@
+:root {
+  --night: #130a28;
+  --violet-deep: #1d0f40;
+  --violet: #2a1458;
+  --orange: #ff7a1a;
+  --amber: #ffb52e;
+  --yellow: #ffc83d;
+  --glow: #ffe9b0;
+  --cream: #fff1d6;
+  --fx: 50%; /* horizontal origin of the embers and the bottom glow */
+  --display: "Mystery Quest", Georgia, serif;
+  --text: "Crimson Pro", Georgia, "Times New Roman", serif;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
   margin: 0;
   min-height: 100%;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: #fff;
-  background: linear-gradient(135deg, #ff5a8a 0%, #ff8a3d 100%);
-  background-attachment: fixed;
+  background: var(--night);
+  color: var(--cream);
+  font-family: var(--text);
+  font-size: 18px;
+  line-height: 1.5;
 }
 
-.wrap {
+::selection { background: var(--yellow); color: #2a1058; }
+
+h1 {
+  margin: 0 0 8px;
+  font-family: var(--display);
+  font-weight: 400;
+  color: var(--yellow);
+  text-shadow: 0 0 26px rgba(255, 122, 26, 0.55);
+  text-wrap: balance;
+}
+
+/* ---------- Night sky (fixed backdrop) ---------- */
+
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 45% at 50% 108%, rgba(255, 122, 26, 0.3), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 18% 20%, rgba(107, 63, 181, 0.35), transparent 70%),
+    linear-gradient(180deg, #0f0720 0%, #1d0f40 50%, #34186e 100%);
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--glow);
+  opacity: 0.2;
+  animation: twinkle var(--dur) ease-in-out var(--delay) infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
+}
+
+.moon {
+  position: absolute;
+  top: 5%;
+  right: 8%;
+  width: clamp(64px, 11vw, 110px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 62% 64%, rgba(214, 160, 60, 0.35) 0 9%, transparent 10%),
+    radial-gradient(circle at 30% 62%, rgba(214, 160, 60, 0.28) 0 6%, transparent 7%),
+    radial-gradient(circle at 35% 35%, #fff6d6 0%, #ffe08a 55%, #f5c451 100%);
+  box-shadow: 0 0 40px 10px rgba(255, 214, 102, 0.28), 0 0 120px 40px rgba(255, 200, 61, 0.12);
+}
+
+.embers { position: absolute; inset: 0; }
+.ember {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe9b0 0%, #ff9a2e 55%, rgba(255, 122, 26, 0) 100%);
+  opacity: 0;
+  animation: rise var(--dur) linear var(--delay) infinite;
+}
+@keyframes rise {
+  0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translate3d(var(--drift), -78vh, 0) scale(0.3); opacity: 0; }
+}
+
+/* ---------- Page layout ---------- */
+
+.page {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: clip;
+}
+
+/* Warm light along the bottom of the screen that brightens as the story grows. */
+.page::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 55vh;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 60% 100% at var(--fx) 100%,
+    rgba(255, 122, 26, 0.45),
+    transparent 70%
+  );
+  opacity: calc(0.15 + var(--fire, 0) * 0.85);
+  transition: opacity 0.8s ease;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 56px 16px 32px;
+}
+
+/* Used by the admin login page */
+.wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 16px;
 }
 
+.hero { text-align: center; max-width: 560px; }
+.hero h1 {
+  font-size: clamp(2.1rem, 8vw, 3.4rem);
+  line-height: 1.08;
+  margin-bottom: 12px;
+}
+
+.sub {
+  margin: 0 auto 16px;
+  max-width: 46ch;
+  color: rgba(255, 241, 214, 0.86);
+  font-size: 1.15rem;
+  text-wrap: pretty;
+}
+.hero .sub { margin-bottom: 0; }
+.card .sub { margin: 0 0 16px; max-width: none; }
+
+/* ---------- Story card ---------- */
+
 .card {
   width: 100%;
-  max-width: 520px;
-  background: #fff;
-  color: #1a1a1a;
-  border-radius: 24px;
-  padding: 28px 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  max-width: 560px;
+  padding: 22px;
+  background: rgba(33, 16, 70, 0.86);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255, 200, 61, 0.24);
+  border-radius: 20px;
+  /* The glow on the card grows with the story. */
+  box-shadow: 0 0 calc(24px + var(--fire, 0) * 60px)
+    rgba(255, 122, 26, calc(0.1 + var(--fire, 0) * 0.32));
+  transition: box-shadow 0.8s ease;
 }
-
-.card.center { text-align: center; }
-
-h1 { margin: 0 0 6px; font-size: 1.4rem; }
-.sub { margin: 0 0 16px; color: #666; font-size: 0.95rem; }
+.card h1 { font-size: 1.8rem; }
 
 textarea {
+  display: block;
   width: 100%;
+  min-height: 200px;
   resize: vertical;
-  min-height: 180px;
-  border: 2px solid #eee;
-  border-radius: 16px;
-  padding: 14px;
-  font: inherit;
-  font-size: 1rem;
-  background: #fafafa;
+  padding: 16px;
+  font: 400 1.2rem/1.55 var(--text);
+  color: var(--cream);
+  caret-color: var(--orange);
+  background: rgba(10, 4, 24, 0.55);
+  border: 1.5px solid rgba(255, 200, 61, 0.22);
+  border-radius: 14px;
 }
-textarea:focus { outline: none; border-color: #ff5a8a; background: #fff; }
+textarea::placeholder { color: rgba(255, 241, 214, 0.55); font-style: italic; }
+textarea:focus {
+  outline: none;
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 3px rgba(255, 200, 61, 0.2);
+}
+textarea:disabled { opacity: 0.6; }
 
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
-.row { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0 14px; font-size: 0.85rem; }
-.count { color: #999; }
-.count.warn { color: #e5484d; }
-.err { color: #e5484d; text-align: right; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 14px;
+  font-size: 0.95rem;
+}
+.count { color: rgba(255, 241, 214, 0.6); }
+.count.warn { color: var(--amber); }
+.err { color: #ff9a8a; text-align: right; }
 
 .btn {
+  display: block;
   width: 100%;
+  padding: 13px 20px;
   border: 0;
   border-radius: 999px;
-  padding: 14px;
-  font: inherit;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #ff5a8a, #ff8a3d);
+  font: 700 1.2rem/1.2 var(--text);
+  color: #2a1058;
+  background: var(--amber);
+  box-shadow: 0 4px 0 #b8480a;
   cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
 }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:hover:not(:disabled) { background: var(--yellow); }
+.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #b8480a; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+.btn-inline { width: auto; margin: 22px auto 0; padding: 12px 28px; }
 
-.fine { margin: 14px 0 0; text-align: center; color: #999; font-size: 0.8rem; }
+.btn:focus-visible,
+.link-btn:focus-visible,
+.del:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+
+.fine {
+  margin: 14px 0 0;
+  text-align: center;
+  color: rgba(255, 241, 214, 0.6);
+  font-size: 0.95rem;
+  text-wrap: balance;
+}
+
+/* ---------- Ground: pines ---------- */
+
+.ground {
+  position: relative;
+  flex-shrink: 0;
+  height: 220px;
+}
+
+.trees {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 760px) {
+  .content { padding-top: 92px; }
+  .moon { top: 18px; right: 5%; width: 44px; }
+  .card { padding: 18px; }
+}
+
+/* On wide screens the pines stay fixed along the bottom edge, always in view. */
+@media (min-width: 1100px) {
+  .ground {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .content { padding-bottom: 48px; }
+}
+
+/* ---------- Respect reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .star { animation: none; }
+  .embers { display: none; }
+  .card, .page::before { transition: none; }
+}

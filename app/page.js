@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Forest from "@/components/Forest";
 
 const MAX_LENGTH = 10000;
 
@@ -34,62 +35,87 @@ export default function Home() {
     }
   }
 
-  if (status === "sent") {
-    return (
-      <main className="wrap">
-        <div className="card center">
-          <h1>Sent 🤫</h1>
-          <p className="sub">Your message was delivered anonymously.</p>
-          <button className="btn" onClick={() => setStatus("idle")}>
-            Send another
-          </button>
-        </div>
-      </main>
-    );
-  }
-
+  // The glow grows as the story grows, and goes to full once a story is shared.
+  const level =
+    status === "sent" ? 1 : Math.min(1, Math.log10(1 + body.length) / 4);
   const remaining = MAX_LENGTH - body.length;
 
   return (
-    <main className="wrap">
-      <form className="card" onSubmit={handleSubmit}>
-        <h1>send me anonymous messages</h1>
-        <p className="sub">Write as much as you want. I won&apos;t know who sent it.</p>
+    <main className="page" style={{ "--fire": level.toFixed(3) }}>
+      <div className="content">
+        {status === "sent" ? (
+          <div className="hero">
+            <h1>Thanks for sharing with us!</h1>
+            <p className="sub">
+              Don't worry, your story is safe with us. Your name stays under the hood.
+            </p>
+            <button
+              className="btn btn-inline"
+              type="button"
+              onClick={() => setStatus("idle")}
+            >
+              Share another story
+            </button>
+          </div>
+        ) : (
+          <>
+            <header className="hero">
+              <h1>Tales from Under the Hood</h1>
+              <p className="sub">
+                Got a spooky school story? Tell us about them! That night before an exam,
+                or that terror teacher from high school, your stories are safe with us 👻📚
+              </p>
+            </header>
 
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          maxLength={MAX_LENGTH}
-          placeholder="say something..."
-          rows={10}
-          disabled={status === "sending"}
-        />
+            <form className="card" onSubmit={handleSubmit}>
+              <textarea
+                aria-label="Your story"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                maxLength={MAX_LENGTH}
+                placeholder="This one time, I deleted my team's project..."
+                rows={8}
+                disabled={status === "sending"}
+              />
 
-        {/* Honeypot: hidden from humans, bots tend to fill it */}
-        <input
-          type="text"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          className="hp"
-        />
+              {/* Honeypot: hidden from humans, bots tend to fill it */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hp"
+              />
 
-        <div className="row">
-          <span className={remaining < 500 ? "count warn" : "count"}>
-            {body.length.toLocaleString()} / {MAX_LENGTH.toLocaleString()}
-          </span>
-          {status === "error" && <span className="err">{error}</span>}
-        </div>
+              <div className="row">
+                <span className={remaining < 500 ? "count warn" : "count"}>
+                  {body.length.toLocaleString()} / {MAX_LENGTH.toLocaleString()}
+                </span>
+                {status === "error" && (
+                  <span className="err" role="alert">
+                    {error}
+                  </span>
+                )}
+              </div>
 
-        <button className="btn" type="submit" disabled={!body.trim() || status === "sending"}>
-          {status === "sending" ? "Sending..." : "Send"}
-        </button>
+              <button
+                className="btn"
+                type="submit"
+                disabled={!body.trim() || status === "sending"}
+              >
+                {status === "sending" ? "Sharing..." : "Share your story"}
+              </button>
 
-        <p className="fine">
-          🔒 Nothing identifying is saved with your message.
-        </p>
-      </form>
+              <p className="fine">
+                Nobody will know it came from you :&gt;
+              </p>
+            </form>
+          </>
+        )}
+      </div>
+
+      <Forest />
     </main>
   );
 }
