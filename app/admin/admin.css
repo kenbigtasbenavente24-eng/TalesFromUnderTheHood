@@ -75,3 +75,46 @@
   border-radius: 8px;
 }
 .del:hover { background: #fdecec; }
+
+.msg-actions { display: flex; align-items: center; gap: 4px; }
+
+.pub {
+  border: 0;
+  background: transparent;
+  color: #5b3fb5;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.pub:hover { background: #efeafc; }
+
+.badge {
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eee;
+  color: #777;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge.live { background: #e3f6e8; color: #1f7a3a; }
+
+.admin-comments {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 0.9rem;
+}
+.admin-comment {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 10px;
+}
+.admin-comment .msg-body { margin: 2px 0 0; }
+.admin-comment-meta { color: #999; font-size: 0.75rem; }

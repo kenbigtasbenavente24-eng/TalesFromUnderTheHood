@@ -1,7 +1,13 @@
 import { cookies } from "next/headers";
 import { sql } from "@/lib/db";
 import { COOKIE_NAME, isValidSession } from "@/lib/auth";
-import { login, logout, deleteMessage } from "./actions";
+import {
+  login,
+  logout,
+  deleteMessage,
+  setPublished,
+  deleteComment,
+} from "./actions";
 import DeleteButton from "./DeleteButton";
 import "./admin.css";
 
@@ -44,11 +50,24 @@ export default async function AdminPage({ searchParams }) {
   }
 
   const messages = await sql`
-    SELECT id, body, created_at
+    SELECT id, body, created_at, published
     FROM messages
     ORDER BY created_at DESC
     LIMIT 200
   `;
+
+  const allComments = await sql`
+    SELECT id, message_id, author, body, created_at
+    FROM comments
+    ORDER BY created_at ASC
+    LIMIT 2000
+  `;
+  const commentsByMessage = new Map();
+  for (const c of allComments) {
+    const key = String(c.message_id);
+    if (!commentsByMessage.has(key)) commentsByMessage.set(key, []);
+    commentsByMessage.get(key).push(c);
+  }
 
   return (
     <main className="admin-wrap">
@@ -70,21 +89,70 @@ export default async function AdminPage({ searchParams }) {
         <div className="msg empty">No messages yet.</div>
       )}
 
-      {messages.map((m) => (
-        <article className="msg" key={m.id}>
-          <p className="msg-body">{m.body}</p>
-          <div className="msg-foot">
-            <time>
-              {new Date(m.created_at).toLocaleString("en-US", {
-                timeZone: TIMEZONE,
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
-            </time>
-            <DeleteButton id={m.id} action={deleteMessage} />
-          </div>
-        </article>
-      ))}
+      {messages.map((m) => {
+        const comments = commentsByMessage.get(String(m.id)) ?? [];
+        return (
+          <article className="msg" key={m.id}>
+            <p className="msg-body">{m.body}</p>
+            <div className="msg-foot">
+              <span>
+                <time>
+                  {new Date(m.created_at).toLocaleString("en-US", {
+                    timeZone: TIMEZONE,
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </time>
+                <span className={m.published ? "badge live" : "badge"}>
+                  {m.published ? "Public" : "Hidden"}
+                </span>
+              </span>
+              <div className="msg-actions">
+                <form action={setPublished}>
+                  <input type="hidden" name="id" value={m.id} />
+                  <input
+                    type="hidden"
+                    name="published"
+                    value={m.published ? "false" : "true"}
+                  />
+                  <button className="pub" type="submit">
+                    {m.published ? "Unpublish" : "Publish"}
+                  </button>
+                </form>
+                <DeleteButton id={m.id} action={deleteMessage} />
+              </div>
+            </div>
+
+            {comments.length > 0 && (
+              <div className="admin-comments">
+                <strong>
+                  {comments.length} {comments.length === 1 ? "comment" : "comments"}
+                </strong>
+                {comments.map((c) => (
+                  <div className="admin-comment" key={c.id}>
+                    <div>
+                      <span className="admin-comment-meta">
+                        {c.author || "Anonymous"} ·{" "}
+                        {new Date(c.created_at).toLocaleString("en-US", {
+                          timeZone: TIMEZONE,
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                      <p className="msg-body">{c.body}</p>
+                    </div>
+                    <DeleteButton
+                      id={c.id}
+                      action={deleteComment}
+                      confirmText="Delete this comment permanently?"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </article>
+        );
+      })}
     </main>
   );
 }

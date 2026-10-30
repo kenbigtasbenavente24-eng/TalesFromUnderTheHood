@@ -1,42 +1,8 @@
-import { sql } from "@/lib/db";
-import { isRateLimited } from "@/lib/ratelimit";
-
-const MAX_LENGTH = 10000;
-
-export async function POST(request) {
-
-  if (await isRateLimited(request)) {
+// Story submissions are closed. The site is now read-and-comment only, so the
+// stories that were already shared stay exactly as they are.
+export async function POST() {
   return Response.json(
-    { error: "Too many messages. Try again in a few minutes." },
-    { status: 429 });
-  }
-
-  let data;
-  try {
-    data = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid request." }, { status: 400 });
-  }
-
-  // Honeypot: real users never fill this hidden field. Pretend success to bots.
-  if (data.website) {
-    return Response.json({ ok: true });
-  }
-
-  const body = typeof data.body === "string" ? data.body.trim() : "";
-
-  if (!body) {
-    return Response.json({ error: "Message can't be empty." }, { status: 400 });
-  }
-  if (body.length > MAX_LENGTH) {
-    return Response.json(
-      { error: `Message is too long (max ${MAX_LENGTH} characters).` },
-      { status: 400 }
-    );
-  }
-
-  // Only the message text is stored. No IP, no user agent.
-  await sql`INSERT INTO messages (body) VALUES (${body})`;
-
-  return Response.json({ ok: true });
+    { error: "Story submissions are closed." },
+    { status: 410 }
+  );
 }

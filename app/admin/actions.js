@@ -49,3 +49,32 @@ export async function deleteMessage(formData) {
   await sql`DELETE FROM messages WHERE id = ${id}`;
   revalidatePath("/admin");
 }
+
+async function requireAdmin() {
+  // Server actions are public endpoints, so check the session in each one.
+  const store = await cookies();
+  if (!isValidSession(store.get(COOKIE_NAME)?.value)) {
+    redirect("/admin");
+  }
+}
+
+export async function setPublished(formData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return;
+  const published = formData.get("published") === "true";
+
+  await sql`UPDATE messages SET published = ${published} WHERE id = ${id}`;
+  revalidatePath("/admin");
+}
+
+export async function deleteComment(formData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id"));
+  if (!Number.isInteger(id)) return;
+
+  await sql`DELETE FROM comments WHERE id = ${id}`;
+  revalidatePath("/admin");
+}
